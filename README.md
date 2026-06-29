@@ -10,6 +10,12 @@ A lightweight desktop widget for **Ubuntu + GNOME (Wayland)** built for **trader
 
 **Author:** [Waldo Panozo](https://waldopanozo.github.io/)
 
+## Preview
+
+![Desktop panel on Ubuntu GNOME — world clocks, Bitcoin price, and system stats](docs/screenshot.png)
+
+*Example: Bolivia, Asunción, and Arizona clocks, live BTC/USD, and CPU/RAM/network stats over a desktop wallpaper.*
+
 ## Why this widget?
 
 | Audience | What you get |
@@ -63,6 +69,8 @@ panel-escritorio-conky/
 ├── README.md                          # English documentation (this file)
 ├── README.es.md                       # Spanish documentation
 ├── LICENSE                            # MIT
+├── docs/
+│   └── screenshot.png                 # README preview screenshot
 ├── conky.conf.in                      # Conky template (paths filled by install.sh)
 ├── scripts/
 │   ├── install.sh                     # Install deps, detect network, generate config

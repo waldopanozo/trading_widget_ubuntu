@@ -10,6 +10,12 @@ Widget de escritorio ligero para **Ubuntu + GNOME (Wayland)** pensado para **tra
 
 **Autor:** [Waldo Panozo](https://waldopanozo.github.io/)
 
+## Vista previa
+
+![Panel de escritorio en Ubuntu GNOME — relojes mundiales, Bitcoin y estadísticas del sistema](docs/screenshot.png)
+
+*Ejemplo: relojes de Bolivia, Asunción y Arizona, BTC/USD en vivo, y CPU/RAM/red sobre el fondo del escritorio.*
+
 ## ¿Por qué este widget?
 
 | Perfil | Qué obtienes |
@@ -63,6 +69,8 @@ panel-escritorio-conky/
 ├── README.md                          # Documentación en inglés
 ├── README.es.md                       # Documentación en español (este archivo)
 ├── LICENSE                            # MIT
+├── docs/
+│   └── screenshot.png                 # Captura de vista previa del README
 ├── conky.conf.in                      # Plantilla Conky (rutas rellenadas por install.sh)
 ├── scripts/
 │   ├── install.sh                     # Instala deps, detecta red, genera config
