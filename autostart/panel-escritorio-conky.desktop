@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Panel Escritorio Conky
-Comment=Relojes, Bitcoin y estadisticas del sistema en el escritorio
-Exec=/home/wpanozo/panel-escritorio-conky/scripts/conky-launch.sh
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true

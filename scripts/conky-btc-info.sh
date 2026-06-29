@@ -20,9 +20,9 @@ fi
 
 json="$(curl -fsS --max-time 8 "$api" 2>/dev/null)" || {
   [[ -f "$cache" ]] && print_mode && exit 0
-  [[ "$mode" == "price" ]] && echo "sin conexion" && exit 0
+  [[ "$mode" == "price" ]] && echo "offline" && exit 0
   [[ "$mode" == "change" ]] && echo "-- (24h)" && exit 0
-  echo "BTC/USD: sin conexion"
+  echo "BTC/USD: offline"
   exit 0
 }
 
@@ -31,9 +31,9 @@ change="$(jq -r '.bitcoin.usd_24h_change' <<<"$json")"
 
 if [[ "$price" == "null" || "$change" == "null" ]]; then
   [[ -f "$cache" ]] && print_mode && exit 0
-  [[ "$mode" == "price" ]] && echo "error API" && exit 0
+  [[ "$mode" == "price" ]] && echo "API error" && exit 0
   [[ "$mode" == "change" ]] && echo "-- (24h)" && exit 0
-  echo "BTC/USD: error API"
+  echo "BTC/USD: API error"
   exit 0
 fi
 

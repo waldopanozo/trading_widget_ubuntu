@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Desktop Panel Conky
+Comment=World clocks, Bitcoin price, and system stats on the desktop
+Comment[es]=Relojes mundiales, Bitcoin y estadísticas del sistema en el escritorio
+Exec=@WIDGET_DIR@/scripts/conky-launch.sh
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+X-Author=Waldo Panozo
+X-Author-URL=https://waldopanozo.github.io/

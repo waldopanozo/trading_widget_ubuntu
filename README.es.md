@@ -1,0 +1,170 @@
+# Panel Escritorio Conky
+
+**Español** | [English](README.md)
+
+Widget de escritorio ligero para **Ubuntu + GNOME (Wayland)** pensado para **traders** y **trabajadores remotos** que necesitan ver de un vistazo horarios de mercado, precio de Bitcoin y estado del sistema — sin salir del escritorio.
+
+![Platform](https://img.shields.io/badge/platform-Ubuntu%20%2B%20GNOME-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Wayland](https://img.shields.io/badge/Wayland-soportado-orange)
+
+**Autor:** [Waldo Panozo](https://waldopanozo.github.io/)
+
+## ¿Por qué este widget?
+
+| Perfil | Qué obtienes |
+|--------|--------------|
+| **Traders** | Precio BTC/USD en vivo con variación 24h (CoinGecko) |
+| **Trabajadores remotos** | Relojes multi-zona con banderas para coordinar equipos |
+| **Usuarios avanzados** | CPU, RAM y velocidad de red de un vistazo |
+
+El panel aparece en la **esquina superior derecha**, semitransparente, queda debajo de las ventanas y se actualiza cada segundo sin robar el foco.
+
+## Qué muestra
+
+| Sección | Contenido | Actualización |
+|---------|-----------|---------------|
+| Relojes | Bolivia, Asunción (Paraguay), Arizona (EE.UU.) con bandera | Cada 1 s |
+| Bitcoin | Precio BTC/USD y cambio 24h | Cada 60 s |
+| Sistema | CPU, RAM y velocidad de red (subida/bajada) | Cada 1 s |
+
+## Requisitos
+
+```bash
+sudo apt install conky-all curl jq python3-pil
+```
+
+| Paquete | Uso |
+|---------|-----|
+| `conky-all` | Motor del widget de escritorio |
+| `curl` + `jq` | Consulta y parseo del precio BTC en CoinGecko |
+| `python3-pil` | Renderiza relojes + banderas en una sola imagen PNG |
+
+## Instalación rápida
+
+```bash
+git clone https://github.com/waldopanozo/trading_widget_ubuntu.git
+cd trading_widget_ubuntu/scripts
+./install.sh
+```
+
+Iniciar el widget manualmente:
+
+```bash
+conky -c ~/panel-escritorio-conky/conky.conf &
+```
+
+El script de instalación también registra un **autostart de GNOME** para que el widget arranque al iniciar sesión en Wayland.
+
+## Estructura del proyecto
+
+```
+panel-escritorio-conky/
+├── README.md                          # Documentación en inglés
+├── README.es.md                       # Documentación en español (este archivo)
+├── LICENSE                            # MIT
+├── conky.conf.in                      # Plantilla Conky (rutas rellenadas por install.sh)
+├── scripts/
+│   ├── install.sh                     # Instala deps, detecta red, genera config
+│   ├── conky-clocks-panel.py          # Renderiza relojes + banderas a PNG
+│   ├── conky-clocks-panel.sh          # Wrapper de Python
+│   ├── conky-btc-info.sh              # Consulta precio BTC en CoinGecko
+│   └── conky-launch.sh                # Lanzador seguro en Wayland/Xwayland
+├── assets/
+│   └── flags/                         # Banderas PNG (Bolivia, Paraguay, USA)
+└── autostart/
+    └── panel-escritorio-conky.desktop.in
+```
+
+## Comandos útiles
+
+```bash
+# Reiniciar el widget
+pkill conky && conky -c ~/panel-escritorio-conky/conky.conf &
+
+# Detener el widget
+pkill conky
+
+# Ver logs de autostart
+tail -f ~/.cache/panel-escritorio-conky/launch.log
+```
+
+## Personalización
+
+### Cambiar zonas horarias o ciudades
+
+Edita `scripts/conky-clocks-panel.py`, sección `ZONES`:
+
+```python
+ZONES = (
+    ("bo.png", "Bolivia", "America/La_Paz"),
+    ("py.png", "Asuncion", "America/Asuncion"),
+    ("us.png", "Arizona", "America/Phoenix"),
+)
+```
+
+Cada tupla es `(archivo_bandera, nombre_visible, zona_IANA)`. Agrega banderas PNG en `assets/flags/` (recomendado 32×22 px).
+
+**Ejemplos para traders / equipos remotos:**
+
+```python
+ZONES = (
+    ("us.png", "Nueva York", "America/New_York"),
+    ("gb.png", "Londres", "Europe/London"),
+    ("jp.png", "Tokio", "Asia/Tokyo"),
+)
+```
+
+### Cambiar interfaz de red
+
+Vuelve a ejecutar install si cambias de Wi-Fi/Ethernet, o edita `conky.conf` directamente:
+
+```bash
+ip route get 1.1.1.1 | awk '{for(i=1;i<=NF;i++) if($i=="dev") print $(i+1)}'
+```
+
+Luego ejecuta `./install.sh` de nuevo para regenerar `conky.conf`.
+
+### Cambiar posición del panel
+
+Edita `conky.conf` (generado tras install):
+
+```lua
+alignment = 'top_right'   -- top_left, bottom_right, bottom_left, etc.
+gap_x = 24
+gap_y = 48
+```
+
+### Cambiar frecuencia del precio BTC
+
+En `conky.conf`, el valor `60` en `${execpi 60 ...}` son segundos. El script también cachea respuestas 60 s en `/tmp/conky-btc.cache`.
+
+## Notas técnicas
+
+- **Workaround Wayland:** GNOME/Mutter no soporta la salida Wayland nativa de Conky. El widget usa **Xwayland** (`out_to_x = true`).
+- **Renderizado de relojes:** Las banderas y horas se componen con **Pillow** en una sola imagen (`/tmp/conky-clocks.png`) porque Conky en Wayland no alinea bien varias imágenes sueltas.
+- **Autostart fiable:** `conky-launch.sh` espera a `gnome-shell` y Xwayland, luego reintenta cada 2 s hasta ~4 minutos.
+- **Datos Bitcoin:** API pública de [CoinGecko](https://www.coingecko.com/) — sin API key. Respeta límites con cache de 60 s.
+- **Logs:** `~/.cache/panel-escritorio-conky/launch.log`
+- **Probado en:** Ubuntu con GNOME Shell en Wayland.
+
+## Limitaciones conocidas
+
+- **Solo GNOME Wayland** — las sesiones X11 no son el objetivo principal; el autostart omite sesiones que no sean Wayland.
+- **Ruta del clone** — `install.sh` resuelve rutas desde donde clones el repo; puedes clonarlo en cualquier carpeta.
+- **Un solo par crypto** — solo BTC/USD; extiende `conky-btc-info.sh` para otros activos.
+- **Interfaz de red** — se detecta al instalar; vuelve a ejecutar install si cambia el nombre de tu dispositivo Wi-Fi/Ethernet.
+
+## Contribuir
+
+Ver [CONTRIBUTING.md](CONTRIBUTING.md). Issues y pull requests son bienvenidos.
+
+## Licencia
+
+MIT — ver [LICENSE](LICENSE).
+
+Las banderas provienen de [flagcdn.com](https://flagcdn.com).
+
+## Autor
+
+Creado por [Waldo Panozo](https://waldopanozo.github.io/) ([GitHub](https://github.com/waldopanozo)) para productividad personal como trader y trabajador remoto.

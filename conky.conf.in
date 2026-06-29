@@ -38,15 +38,15 @@ conky.config = {
 };
 
 conky.text = [[
-${execpi 1 /home/wpanozo/panel-escritorio-conky/scripts/conky-clocks-panel.sh}${image /tmp/conky-clocks.png -p 0,0 -s 250x174}
+${execpi 1 @WIDGET_DIR@/scripts/conky-clocks-panel.sh}${image /tmp/conky-clocks.png -p 0,0 -s 250x174}
 ${voffset 168}
 ${hr 1}
 ${color F7931A}${font Sans:bold:size=12}Bitcoin${font}${color}
-${color F7931A}${font Sans:bold:size=28}${execpi 60 /home/wpanozo/panel-escritorio-conky/scripts/conky-btc-info.sh price}${font}${color}
-${color F7931A}${font Sans:bold:size=11}${execpi 60 /home/wpanozo/panel-escritorio-conky/scripts/conky-btc-info.sh change}${font}${color}
+${color F7931A}${font Sans:bold:size=28}${execpi 60 @WIDGET_DIR@/scripts/conky-btc-info.sh price}${font}${color}
+${color F7931A}${font Sans:bold:size=11}${execpi 60 @WIDGET_DIR@/scripts/conky-btc-info.sh change}${font}${color}
 
 ${voffset 6}${hr 1}
 ${color 888888}System${color}
 CPU ${cpu cpu0}%  RAM ${memperc}%
-${color 888888}Network${color} ${downspeed wlp108s0} / ${upspeed wlp108s0}
+${color 888888}Network${color} ${downspeed @NET_INTERFACE@} / ${upspeed @NET_INTERFACE@}
 ]];

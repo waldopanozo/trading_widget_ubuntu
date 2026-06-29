@@ -30,7 +30,7 @@ try_launch_conky() {
   "$WIDGET_ROOT/scripts/conky-clocks-panel.sh" >>"$LOG" 2>&1 || true
 
   {
-    echo "=== $(date -Is) lanzando Conky ==="
+    echo "=== $(date -Is) launching Conky ==="
     echo "WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}"
     echo "XDG_SESSION_TYPE=${XDG_SESSION_TYPE:-}"
     echo "DISPLAY=${DISPLAY:-}"
@@ -51,33 +51,33 @@ worker_main() {
 
   for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
     if conky_running; then
-      echo "$(date -Is) Conky activo (intento ${attempt})" >>"$LOG"
+      echo "$(date -Is) Conky running (attempt ${attempt})" >>"$LOG"
       exit 0
     fi
 
     if ! pgrep -x gnome-shell >/dev/null 2>&1; then
-      echo "$(date -Is) intento ${attempt}: esperando gnome-shell" >>"$LOG"
+      echo "$(date -Is) attempt ${attempt}: waiting for gnome-shell" >>"$LOG"
       sleep "$RETRY_INTERVAL"
       continue
     fi
 
     if ! xwayland_ready; then
-      echo "$(date -Is) intento ${attempt}: esperando Xwayland (DISPLAY=${DISPLAY:-}:0)" >>"$LOG"
+      echo "$(date -Is) attempt ${attempt}: waiting for Xwayland (DISPLAY=${DISPLAY:-}:0)" >>"$LOG"
       sleep "$RETRY_INTERVAL"
       continue
     fi
 
     if try_launch_conky; then
-      echo "$(date -Is) Conky iniciado en intento ${attempt}" >>"$LOG"
+      echo "$(date -Is) Conky started on attempt ${attempt}" >>"$LOG"
       exit 0
     fi
 
     pkill -f "${WIDGET_ROOT}/conky.conf" >/dev/null 2>&1 || true
-    echo "$(date -Is) intento ${attempt}: fallo al iniciar, reintentando..." >>"$LOG"
+    echo "$(date -Is) attempt ${attempt}: launch failed, retrying..." >>"$LOG"
     sleep "$RETRY_INTERVAL"
   done
 
-  echo "$(date -Is) ERROR: agotados ${MAX_ATTEMPTS} intentos" >>"$LOG"
+  echo "$(date -Is) ERROR: exhausted ${MAX_ATTEMPTS} attempts" >>"$LOG"
   exit 1
 }
 
