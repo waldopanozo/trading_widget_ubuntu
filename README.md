@@ -20,7 +20,7 @@ A lightweight desktop widget for **Ubuntu + GNOME (Wayland)** built for **trader
 
 | Audience | What you get |
 |----------|--------------|
-| **Traders** | Live BTC/USD price with 24h change (CoinGecko) |
+| **Traders** | Live BTC/USD price with 24h change (CoinGecko) + P2P USDT buy/sell for PY and BO |
 | **Remote workers** | Multi-timezone clocks with country flags for team coordination |
 | **Power users** | CPU, RAM, and network throughput at a glance |
 
@@ -32,6 +32,7 @@ The panel sits in the **top-right corner**, semi-transparent, stays below applic
 |---------|---------|--------------|
 | Clocks | Bolivia, Asunción (Paraguay), Arizona (US) with flags | Every 1 s |
 | Bitcoin | BTC/USD price and 24h change | Every 60 s |
+| P2P USDT | Buy/sell prices for Paraguay (PYG) and Bolivia (BOB) via TradersWorld API | Every 60 s |
 | System | CPU, RAM, and network up/down speed | Every 1 s |
 
 ## Requirements
@@ -77,6 +78,7 @@ panel-escritorio-conky/
 │   ├── conky-clocks-panel.py          # Renders clocks + flags to PNG
 │   ├── conky-clocks-panel.sh          # Python wrapper
 │   ├── conky-btc-info.sh              # CoinGecko BTC price fetcher
+│   ├── conky-p2p-info.sh              # TradersWorld P2P USDT rates (PY/BO)
 │   └── conky-launch.sh                # Safe Wayland/Xwayland autostart launcher
 ├── assets/
 │   └── flags/                         # PNG flags (Bolivia, Paraguay, USA)
@@ -153,6 +155,7 @@ In `conky.conf`, the value `60` in `${execpi 60 ...}` is seconds. The shell scri
 - **Clock rendering:** Flags and times are composited with **Pillow** into one image (`/tmp/conky-clocks.png`) because Conky on Wayland misaligns multiple separate images.
 - **Autostart reliability:** `conky-launch.sh` waits for `gnome-shell` and Xwayland, then retries every 2 s for up to ~4 minutes.
 - **Bitcoin data:** Public [CoinGecko API](https://www.coingecko.com/) — no API key required. Respects rate limits via 60 s cache.
+- **P2P data:** [TradersWorld](https://tradersworld.top) private API (`/api/public/p2p/{py|bo}`) with `X-API-Key` header auth. API key stored in `~/.config/conky-p2p.env` (not committed to git). Cache: 60 s in `/tmp/conky-p2p-{py|bo}.cache`.
 - **Logs:** `~/.cache/panel-escritorio-conky/launch.log`
 - **Tested on:** Ubuntu with GNOME Shell on Wayland.
 
@@ -160,7 +163,7 @@ In `conky.conf`, the value `60` in `${execpi 60 ...}` is seconds. The shell scri
 
 - **GNOME Wayland only** — X11 sessions are not the primary target; autostart skips non-Wayland sessions.
 - **Hardcoded clone path in docs** — `install.sh` resolves paths from the clone location; you can clone anywhere.
-- **Single crypto pair** — BTC/USD only; extend `conky-btc-info.sh` for other assets.
+- **Single crypto pair** — BTC/USD from CoinGecko; P2P USDT rates require a TradersWorld API key in `~/.config/conky-p2p.env`.
 - **Network interface** — detected at install time; re-run install if your Wi-Fi/Ethernet device name changes.
 
 ## Contributing
