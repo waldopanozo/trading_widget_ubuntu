@@ -82,17 +82,26 @@ print_country() {
     sell)  echo "$fs" ;;
     line)  printf "%s  C: %s  V: %s\n" "$label" "$fb" "$fs" ;;
     conky)
-      # Conky markup: flag + label, then green buy ▲ and red sell ▼ side by side
       printf '${color FFFFFF}${font Sans:bold:size=10}%s %s${font}${color}\n' "$flag" "$label"
-      printf '${goto 10}${color 00C853}${font Sans:bold:size=13}▲ %s${font}${color}' "$fb"
-      printf '${goto 135}${color FF1744}${font Sans:bold:size=13}▼ %s${font}${color}\n' "$fs"
+      printf '${goto 10}${color 00C853}${font DejaVu Sans:bold:size=12}▲${font}${font Sans:bold:size=13} %s${font}${color}' "$fb"
+      printf '${goto 135}${color FF1744}${font DejaVu Sans:bold:size=12}▼${font}${font Sans:bold:size=13} %s${font}${color}\n' "$fs"
       ;;
   esac
+}
+
+print_header() {
+  cat <<'CONKY'
+${voffset 6}${hr 1}
+${color 26A17B}${font Sans:bold:size=12}P2P USDT${font}${color}  ${color 888888}${font Sans:size=8}tradersworld.top${font}${color}
+CONKY
 }
 
 case "$country" in
   py|bo) print_country "$country" ;;
   all)
+    if [[ "$mode" == "conky" ]]; then
+      print_header
+    fi
     print_country "py"
     print_country "bo"
     ;;
