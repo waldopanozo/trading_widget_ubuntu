@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: conky-p2p-info.sh <py|bo|all> [mode]
-# mode: buy | sell | line (default: line = "C: X  V: Y")
+# Usage: conky-p2p-info.sh <py|bo|all> [buy|sell|line|conky]
+# Outputs nothing when the API key is not configured (widget hides P2P section).
 country="${1:-all}"
-mode="${2:-line}"
+mode="${2:-conky}"
 
 ENV_FILE="${HOME}/.config/conky-p2p.env"
 if [[ -f "$ENV_FILE" ]]; then
@@ -13,12 +13,16 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 API_KEY="${TRADERSWORLD_API_KEY:-}"
 if [[ -z "$API_KEY" ]]; then
-  echo "API key not configured in ${ENV_FILE}"
-  exit 1
+  exit 0
 fi
 
 BASE_URL="https://tradersworld.top/api/public/p2p"
 CACHE_TTL=60
+
+COUNTRY_LABEL_py="PYG"
+COUNTRY_LABEL_bo="BOB"
+COUNTRY_FLAG_py="🇵🇾"
+COUNTRY_FLAG_bo="🇧🇴"
 
 fetch_country() {
   local cc="$1"
@@ -68,10 +72,21 @@ print_country() {
   fb="$(format_price "$buy" "$currency")"
   fs="$(format_price "$sell" "$currency")"
 
+  local label_var="COUNTRY_LABEL_${cc}"
+  local flag_var="COUNTRY_FLAG_${cc}"
+  local label="${!label_var:-$(echo "$cc" | tr '[:lower:]' '[:upper:]')}"
+  local flag="${!flag_var:-}"
+
   case "$mode" in
-    buy) echo "$fb" ;;
-    sell) echo "$fs" ;;
-    *) printf "%s  C: %s  V: %s\n" "$(echo "$cc" | tr '[:lower:]' '[:upper:]')" "$fb" "$fs" ;;
+    buy)   echo "$fb" ;;
+    sell)  echo "$fs" ;;
+    line)  printf "%s  C: %s  V: %s\n" "$label" "$fb" "$fs" ;;
+    conky)
+      # Conky markup: flag + label, then green buy ▲ and red sell ▼ side by side
+      printf '${color FFFFFF}${font Sans:bold:size=10}%s %s${font}${color}\n' "$flag" "$label"
+      printf '${goto 10}${color 00C853}${font Sans:bold:size=13}▲ %s${font}${color}' "$fb"
+      printf '${goto 135}${color FF1744}${font Sans:bold:size=13}▼ %s${font}${color}\n' "$fs"
+      ;;
   esac
 }
 
@@ -82,7 +97,7 @@ case "$country" in
     print_country "bo"
     ;;
   *)
-    echo "Usage: $0 <py|bo|all> [buy|sell|line]"
+    echo "Usage: $0 <py|bo|all> [buy|sell|line|conky]"
     exit 1
     ;;
 esac
