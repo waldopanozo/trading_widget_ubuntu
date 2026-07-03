@@ -21,8 +21,10 @@ CACHE_TTL=60
 
 COUNTRY_LABEL_py="PYG"
 COUNTRY_LABEL_bo="BOB"
-COUNTRY_FLAG_py="🇵🇾"
-COUNTRY_FLAG_bo="🇧🇴"
+COUNTRY_COLOR_py="CE1126"
+COUNTRY_COLOR_bo="007934"
+COUNTRY_TAG_py="PY"
+COUNTRY_TAG_bo="BO"
 
 fetch_country() {
   local cc="$1"
@@ -73,16 +75,18 @@ print_country() {
   fs="$(format_price "$sell" "$currency")"
 
   local label_var="COUNTRY_LABEL_${cc}"
-  local flag_var="COUNTRY_FLAG_${cc}"
+  local color_var="COUNTRY_COLOR_${cc}"
+  local tag_var="COUNTRY_TAG_${cc}"
   local label="${!label_var:-$(echo "$cc" | tr '[:lower:]' '[:upper:]')}"
-  local flag="${!flag_var:-}"
+  local ccolor="${!color_var:-FFFFFF}"
+  local tag="${!tag_var:-$(echo "$cc" | tr '[:lower:]' '[:upper:]')}"
 
   case "$mode" in
     buy)   echo "$fb" ;;
     sell)  echo "$fs" ;;
     line)  printf "%s  C: %s  V: %s\n" "$label" "$fb" "$fs" ;;
     conky)
-      printf '${color FFFFFF}${font Sans:bold:size=10}%s %s${font}${color}\n' "$flag" "$label"
+      printf '${color %s}${font Sans:bold:size=10}%s${font}${color} ${color BBBBBB}${font Sans:size=10}%s${font}${color}\n' "$ccolor" "$tag" "$label"
       printf '${goto 10}${color 00C853}${font DejaVu Sans:bold:size=12}▲${font}${font Sans:bold:size=13} %s${font}${color}' "$fb"
       printf '${goto 135}${color FF1744}${font DejaVu Sans:bold:size=12}▼${font}${font Sans:bold:size=13} %s${font}${color}\n' "$fs"
       ;;
