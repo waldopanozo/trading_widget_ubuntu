@@ -6,7 +6,9 @@ conky.conf
 *.swp
 *.swo
 *~
+scripts/__pycache__/
 
 # Runtime caches (created by widget scripts)
 /tmp/conky-clocks.png
 /tmp/conky-btc.cache
+/tmp/conky-weather.cache

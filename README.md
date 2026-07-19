@@ -14,14 +14,14 @@ A lightweight desktop widget for **Ubuntu + GNOME (Wayland)** built for **trader
 
 ![Desktop panel on Ubuntu GNOME — world clocks, Bitcoin price, and system stats](docs/screenshot.png)
 
-*Example: Bolivia, Asunción, and Arizona clocks, live BTC/USD, and CPU/RAM/network stats over a desktop wallpaper.*
+*Example: Cochabamba, Asunción, and Phoenix clocks with weather (°C), live BTC/USD, and CPU/RAM/network stats over a desktop wallpaper.*
 
 ## Why this widget?
 
 | Audience | What you get |
 |----------|--------------|
 | **Traders** | Live BTC/USD price with 24h change (CoinGecko) + P2P USDT buy/sell for PY and BO |
-| **Remote workers** | Multi-timezone clocks with country flags for team coordination |
+| **Remote workers** | Multi-timezone clocks with country flags and current weather for team coordination |
 | **Power users** | CPU, RAM, and network throughput at a glance |
 
 The panel sits in the **top-right corner**, semi-transparent, stays below application windows, and updates every second without stealing focus.
@@ -30,7 +30,7 @@ The panel sits in the **top-right corner**, semi-transparent, stays below applic
 
 | Section | Content | Refresh rate |
 |---------|---------|--------------|
-| Clocks | Bolivia, Asunción (Paraguay), Arizona (US) with flags | Every 1 s |
+| Clocks | Cochabamba, Asunción, Phoenix: flag, time, weather emoji and °C | Every 1 s (weather cached 15 min) |
 | Bitcoin | BTC/USD price and 24h change | Every 60 s |
 | P2P USDT | Buy/sell prices for Paraguay (PYG) and Bolivia (BOB) via TradersWorld API | Every 60 s |
 | System | CPU, RAM, and network up/down speed | Every 1 s |
@@ -45,7 +45,7 @@ sudo apt install conky-all curl jq python3-pil
 |---------|---------|
 | `conky-all` | Desktop widget engine |
 | `curl` + `jq` | Fetch and parse Bitcoin price from CoinGecko |
-| `python3-pil` | Render timezone clocks + flags into a single PNG |
+| `python3-pil` | Render timezone clocks, flags, and weather into a single PNG |
 
 ## Quick start
 
@@ -75,7 +75,7 @@ panel-escritorio-conky/
 ├── conky.conf.in                      # Conky template (paths filled by install.sh)
 ├── scripts/
 │   ├── install.sh                     # Install deps, detect network, generate config
-│   ├── conky-clocks-panel.py          # Renders clocks + flags to PNG
+│   ├── conky-clocks-panel.py          # Renders clocks + flags + weather to PNG
 │   ├── conky-clocks-panel.sh          # Python wrapper
 │   ├── conky-btc-info.sh              # CoinGecko BTC price fetcher
 │   ├── conky-p2p-info.sh              # TradersWorld P2P USDT rates (PY/BO)
@@ -107,21 +107,21 @@ Edit `scripts/conky-clocks-panel.py`, section `ZONES`:
 
 ```python
 ZONES = (
-    ("bo.png", "Bolivia", "America/La_Paz"),
-    ("py.png", "Asuncion", "America/Asuncion"),
-    ("us.png", "Arizona", "America/Phoenix"),
+    ("bo.png", "Cochabamba", "America/La_Paz", -17.3895, -66.1568),
+    ("py.png", "Asuncion", "America/Asuncion", -25.2637, -57.5759),
+    ("us.png", "Phoenix", "America/Phoenix", 33.4484, -112.0740),
 )
 ```
 
-Each tuple is `(flag_file, display_name, IANA_timezone)`. Add PNG flags under `assets/flags/` (32×22 px recommended).
+Each tuple is `(flag_file, display_name, IANA_timezone, lat, lon)`. Coordinates feed Open-Meteo weather. Add PNG flags under `assets/flags/` (32×22 px recommended).
 
 **Examples for traders / remote teams:**
 
 ```python
 ZONES = (
-    ("us.png", "New York", "America/New_York"),
-    ("gb.png", "London", "Europe/London"),
-    ("jp.png", "Tokyo", "Asia/Tokyo"),
+    ("us.png", "New York", "America/New_York", 40.7128, -74.0060),
+    ("gb.png", "London", "Europe/London", 51.5074, -0.1278),
+    ("jp.png", "Tokyo", "Asia/Tokyo", 35.6762, 139.6503),
 )
 ```
 
@@ -152,7 +152,8 @@ In `conky.conf`, the value `60` in `${execpi 60 ...}` is seconds. The shell scri
 ## Technical notes
 
 - **Wayland workaround:** GNOME/Mutter does not support Conky's native Wayland output. The widget uses **Xwayland** (`out_to_x = true`).
-- **Clock rendering:** Flags and times are composited with **Pillow** into one image (`/tmp/conky-clocks.png`) because Conky on Wayland misaligns multiple separate images. `${image ... -n}` plus `imlib_cache_size = 0` prevent Imlib2 from freezing the first frame (e.g. startup time).
+- **Clock rendering:** Flags, times, and weather are composited with **Pillow** into one image (`/tmp/conky-clocks.png`) because Conky on Wayland misaligns multiple separate images. `${image ... -n}` plus `imlib_cache_size = 0` prevent Imlib2 from freezing the first frame (e.g. startup time).
+- **Weather:** [Open-Meteo](https://open-meteo.com/) (no API key). Emoji + °C per city; 15 min cache in `/tmp/conky-weather.cache`.
 - **Autostart reliability:** `conky-launch.sh` waits for `gnome-shell` and Xwayland, then retries every 2 s for up to ~4 minutes.
 - **Bitcoin data:** Public [CoinGecko API](https://www.coingecko.com/) — no API key required. Respects rate limits via 60 s cache.
 - **P2P data:** [TradersWorld](https://tradersworld.top) private API (`/api/public/p2p/{py|bo}`) with `X-API-Key` header auth. API key stored in `~/.config/conky-p2p.env` (not committed to git). Cache: 60 s in `/tmp/conky-p2p-{py|bo}.cache`.
