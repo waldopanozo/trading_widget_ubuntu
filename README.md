@@ -152,7 +152,7 @@ In `conky.conf`, the value `60` in `${execpi 60 ...}` is seconds. The shell scri
 ## Technical notes
 
 - **Wayland workaround:** GNOME/Mutter does not support Conky's native Wayland output. The widget uses **Xwayland** (`out_to_x = true`).
-- **Clock rendering:** Flags and times are composited with **Pillow** into one image (`/tmp/conky-clocks.png`) because Conky on Wayland misaligns multiple separate images.
+- **Clock rendering:** Flags and times are composited with **Pillow** into one image (`/tmp/conky-clocks.png`) because Conky on Wayland misaligns multiple separate images. `${image ... -n}` plus `imlib_cache_size = 0` prevent Imlib2 from freezing the first frame (e.g. startup time).
 - **Autostart reliability:** `conky-launch.sh` waits for `gnome-shell` and Xwayland, then retries every 2 s for up to ~4 minutes.
 - **Bitcoin data:** Public [CoinGecko API](https://www.coingecko.com/) — no API key required. Respects rate limits via 60 s cache.
 - **P2P data:** [TradersWorld](https://tradersworld.top) private API (`/api/public/p2p/{py|bo}`) with `X-API-Key` header auth. API key stored in `~/.config/conky-p2p.env` (not committed to git). Cache: 60 s in `/tmp/conky-p2p-{py|bo}.cache`.
